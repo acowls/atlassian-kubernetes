@@ -5,11 +5,17 @@
 # Notes:
 This deployment has been updated to use the official [Atlassian Jira Software Images](https://hub.docker.com/r/atlassian/jira-servicedesk). There's a few changes included in these from the prior images. As such, the configmaps are not required and do have some problems with how permissions are managed, but using ENVs & secrets is more secure. 
 
+This is modified from the good work of https://github.com/Bonn93/atlassian-kubernetes
+
 The k8s objects have been split into several files, this helps with troubleshooting as it makes identifcation of failures in each file more apparent. 
 
 A example envs.yml file has been provided, this contains nearly all configurable options and tweaks. Feel free to extend this further by using Ansible {{}} jinja format. 
 
-You should use an IngressController to properly manage sticky sessions and load balance traffic between pods.
+It is intended that an Ingress Controller is used in front to manage sticky sessions and load balance traffic between pods.
+
+# Target Environment is Azure, with:
+* Azure Web Application Firewall and Gateway
+* DBaaS hosted in Azure with JDBC connection string
 
 # Mapping custom files
 You may have a custom dbconfig.xml or server.xml requirements. This repo includes basic support to map these files in such as the server.xml for HTTP2 support. Please note that due to how permissions are managed, this may cause start-up failures until bugs are resolved. 
