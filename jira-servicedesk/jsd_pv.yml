@@ -8,7 +8,4 @@ spec:
   capacity:
     storage: {{storagesize}}
   accessModes:
-    - ReadWriteMany
-  nfs:
-    server: {{nfsserverip}}
-    path: {{nfspath}}
+    - ReadWriteOnce

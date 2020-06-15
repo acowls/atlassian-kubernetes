@@ -6,7 +6,8 @@ metadata:
   namespace: {{namespace}}
 spec:
   accessModes:
-    - ReadWriteMany
-  resources:
+    - ReadWriteOnce
+  storageClassName: managed-premium-retain
+    resources:
     requests:
       storage: 5Gi
