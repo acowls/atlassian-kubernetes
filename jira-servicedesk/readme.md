@@ -7,6 +7,9 @@ This deployment has been updated to use the official [Atlassian Jira Software Im
 
 This is modified from the good work of https://github.com/Bonn93/atlassian-kubernetes
 
+Notes on dcoker from Atlassian: https://hub.docker.com/r/atlassian/jira-servicedesk
+Note: the Jira application runs as the user jira, with a UID and GID of 2001. 
+
 The k8s objects have been split into several files, this helps with troubleshooting as it makes identifcation of failures in each file more apparent. 
 
 A example envs.yml file has been provided, this contains nearly all configurable options and tweaks. Feel free to extend this further by using Ansible {{}} jinja format. 
@@ -15,7 +18,16 @@ It is intended that an Ingress Controller is used in front to manage sticky sess
 
 # Target Environment is Azure, with:
 * Azure Web Application Firewall and Gateway
-* DBaaS hosted in Azure with JDBC connection string
+* Azure DBaaS hosted in Azure with JDBC connection string
+* Single node K8
+* Azure Managed Disk for storage
+
+# Quick Deploy
+```ansible-playbook jsd_deploy_playbook.yaml -e @envs.yaml```
+
+# Quik Deploys Steps
+1. To create the storage class
+```kubectl apply -f azure-files-pod.yaml```
 
 # Mapping custom files
 You may have a custom dbconfig.xml or server.xml requirements. This repo includes basic support to map these files in such as the server.xml for HTTP2 support. Please note that due to how permissions are managed, this may cause start-up failures until bugs are resolved. 
@@ -29,29 +41,8 @@ You may have a custom dbconfig.xml or server.xml requirements. This repo include
 * The jira-servicedesk-0 pod is online and healthy
 ```kubectl scale sts/jira-servicedesk --replicas=2```
 
-# Scaling Jira
-* Ensure you meet clustering requirements including a decent amount of CPUs and Memory.
-* Production clusters should have at least 8 CPUs
-* Ensure adequate Pod memory is allocated ( greater than XMX )
-* Ensure to scale the XMX/XMS values
-* Ensure you run on modern hardware
-* 3-4 pods in the statefulset will be optimial, going above this is not recommended
-* Increasing the max_connections for the postgres service will be needed to scale the connection pool
-* Increase pool settings in the DBConfig Configmap
-* Ensure you have adequate NFS performance
-* Run this on large Kube Nodes with modern CPUs
-
-
-
-# Quick Deploy
-```ansible-playbook jsd_deploy_playbook.yaml -e @envs.yaml```
-
-# ZDU Upgrades
-ZDU is super simple and can be automagically mangaged with simple scripts or using a CI/CD tool or simple scripts.
-1. Use the [API](https://docs.atlassian.com/software/jira/docs/api/REST/8.5.2/#api/2/cluster/zdu) to put the cluster into upgrade mode
-2. Perform a rolling upgrade of the containers ( ie 8.4.1 > 8.4.2 ) and let k8s replace each member
-3. Finalise the upgrade in Jira
-4. Done. 
+# Scaling Jira and ZDU Upgrades
+* ZDU is only for JIRA Data Centre Edition
 
 # Customizing Options
 This guide relies on NFS volumes and static node-port type load balancers. These can be changed. The Jira docker container accepts several ENV variables to configure JVM or Tomcat HTTP options, these are documented in the official atlassian jira images as linked above. 

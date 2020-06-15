@@ -9,3 +9,4 @@ spec:
     storage: {{storagesize}}
   accessModes:
     - ReadWriteOnce
+  storageClassName: managed-premium-retain
